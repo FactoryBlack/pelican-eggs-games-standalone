@@ -14,14 +14,19 @@ RUN apk update && apk upgrade && \
     python3 \
     py3-pip
 
+# Create necessary directories (like /mnt/server and /mnt/install)
+RUN mkdir -p /mnt/server /mnt/install
+
 # Set the working directory to /mnt/server
 WORKDIR /mnt/server
 
-# Copy the entrypoint script into the container
+# Copy the entrypoint and install scripts into the container
 COPY entrypoint.sh /entrypoint.sh
+COPY start.sh /mnt/server/start.sh
+COPY install.sh /mnt/install/install.sh
 
-# Set executable permissions for the entrypoint script
-RUN chmod +x /entrypoint.sh
+# Set executable permissions for the scripts
+RUN chmod +x /entrypoint.sh /mnt/server/start.sh /mnt/install/install.sh
 
-# Set the entrypoint to initialize the container when it starts
+# Set the entrypoint to handle initialization when the container starts
 ENTRYPOINT ["/entrypoint.sh"]
