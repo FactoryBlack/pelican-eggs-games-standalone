@@ -21,7 +21,7 @@ RUN mkdir -p /mnt/server
 WORKDIR /mnt/server
 
 # Copy the entrypoint script into the container
-COPY entrypoint.sh /entrypoint.sh
+COPY ./entrypoint.sh /entrypoint.sh
 
 # Set executable permissions for the entrypoint script
 RUN chmod +x /entrypoint.sh
