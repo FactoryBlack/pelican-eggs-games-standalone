@@ -1,0 +1,259 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2024-10-13T07:57:45+00:00",
+    "name": "Trackmania 2020 + MiniControl",
+    "author": "jules@factory.black",
+    "uuid": "c47cb969-9b83-484e-a5f7-fda527735167",
+    "description": "An egg to run a Trackmania 2020 server with MiniControl.",
+    "features": [],
+    "docker_images": {
+        "Pelican Core": "ghcr.io\/pelican-eggs\/yolks:source"
+    },
+    "file_denylist": [],
+    "startup": ".\/TrackmaniaServer \/game_settings=MatchSettings\/matchsettings.txt & minicontrol --config=${MINICONTROL_CONFIG}\n",
+    "config": {
+        "files": "{\n    \"server\/UserData\/Config\/dedicated_cfg.txt\": {\n        \"parser\": \"xml\",\n        \"find\": {\n            \"dedicated.system_config.server_port\": \"{{server.allocations.default.port}}\",\n            \"dedicated.system_config.xmlrpc_port\": \"{{server.environment.RPC_PORT}}\",\n            \"dedicated.system_config.force_ip_address\": \"{{server.environment.FORCE_IP_ADDRESS}}\",\n            \"dedicated.server_options.name\": \"{{server.environment.SERVER_NAME}}\",\n            \"dedicated.server_options.max_players\": \"{{server.environment.MAX_PLAYER}}\",\n            \"dedicated.masterserver_account.login\": \"{{server.environment.MASTER_LOGIN}}\",\n            \"dedicated.masterserver_account.password\": \"{{server.environment.MASTER_PASSWORD}}\"\n        }\n    },\n    \"MiniControl\/config.yml\": {\n        \"parser\": \"yaml\",\n        \"find\": {\n            \"XMLRPC_HOST\": \"{{server.environment.MINICONTROL_HOST}}\",\n            \"XMLRPC_PORT\": \"{{server.environment.MINICONTROL_PORT}}\",\n            \"XMLRPC_USER\": \"{{server.environment.MINICONTROL_USER}}\",\n            \"XMLRPC_PASS\": \"{{server.environment.MINICONTROL_PASSWORD}}\",\n            \"SERVER_LOGIN\": \"{{server.environment.MASTER_LOGIN}}\",\n            \"SERVER_PASS\": \"{{server.environment.MASTER_PASSWORD}}\",\n            \"CONTACT_INFO\": \"{{server.environment.CONTACT_INFO}}\"\n        }\n    },\n    \"MiniControl\/logs\/minicontrol.log\": {\n        \"custom\": false\n    }\n}",
+        "startup": "{\n  \"done\": \"Server is running\"\n}\n",
+        "logs": "{\n  \"logs\/latest.log\": {\n    \"custom\": false\n  },\n  \"minicontrol.log\": {\n    \"custom\": false\n  }\n}\n",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\r\n# Navigate to the server directory\r\ncd \/mnt\/server\r\n\r\n# Update and install necessary packages\r\napk update && apk upgrade\r\napk add --no-cache git xmlstarlet jq curl unzip nodejs npm\r\n\r\n# Step 1: Install the Trackmania Server\r\necho \">>> Downloading the latest Trackmania Server... Please wait...\"\r\ncurl -sSL -o TrackmaniaServer.zip http:\/\/files.v04.maniaplanet.com\/server\/TrackmaniaServer_Latest.zip\r\n\r\n# Extract the server files\r\necho \">>> Extracting files...\"\r\nunzip -o TrackmaniaServer.zip -d server\r\n\r\n# Move default configuration files if they don\u2019t exist\r\necho \">>> Moving files...\"\r\nmv -n .\/server\/UserData\/Config\/dedicated_cfg.default.txt .\/server\/UserData\/Config\/dedicated_cfg.txt\r\nmv -n .\/server\/UserData\/Maps\/MatchSettings\/example.txt .\/server\/UserData\/Maps\/MatchSettings\/tracklist.txt\r\n\r\n# Configure the dedicated_cfg.txt with server details\r\necho \">>> Editing dedicated_cfg.txt...\"\r\nxmlstarlet ed -L \\\r\n  -u \"\/\/masterserver_account\/login\" -v \"$MASTER_LOGIN\" \\\r\n  -u \"\/\/masterserver_account\/password\" -v \"$MASTER_PASSWORD\" \\\r\n  -u \"\/\/server_options\/name\" -v \"$SERVER_NAME\" \\\r\n  -u \"\/\/system_config\/xmlrpc_allowremote\" -v \"True\" \\\r\n  -u \"\/\/system_config\/force_ip_address\" -v \"$FORCE_IP_ADDRESS\" \\\r\n  -u \"\/\/system_config\/server_port\" -v \"$SERVER_PORT\" \\\r\n  .\/server\/UserData\/Config\/dedicated_cfg.txt\r\n\r\n# Clean up unnecessary files\r\necho \">>> Cleaning up...\"\r\nrm TrackmaniaServer.zip\r\ncd server\r\nchmod +x TrackmaniaServer\r\nrm TrackmaniaServer.exe\r\n\r\n# Step 2: Install MiniControl Using NPM\r\necho \">>> Installing MiniControl with npm...\"\r\ncd \/mnt\/server\r\ngit clone https:\/\/github.com\/EvoEsports\/minicontrol.git\r\ncd minicontrol\r\nnpm install\r\n\r\n# Copy .env.example to .env and configure\r\necho \">>> Setting up .env file for MiniControl...\"\r\ncp .env.example .env\r\n\r\n# Configure .env with the environment variables\r\nsed -i \"s\/DB_HOST=.*\/DB_HOST=$DB_HOST\/\" .env\r\nsed -i \"s\/DB_NAME=.*\/DB_NAME=$DB_NAME\/\" .env\r\nsed -i \"s\/DB_USER=.*\/DB_USER=$DB_USER\/\" .env\r\nsed -i \"s\/DB_PASSWORD=.*\/DB_PASSWORD=$DB_PASSWORD\/\" .env\r\nsed -i \"s\/DB_PORT=.*\/DB_PORT=$DB_PORT\/\" .env\r\nsed -i \"s\/MINICONTROL_PORT=.*\/MINICONTROL_PORT=$MINICONTROL_PORT\/\" .env\r\nsed -i \"s\/MINICONTROL_HOST=.*\/MINICONTROL_HOST=$MINICONTROL_HOST\/\" .env\r\nsed -i \"s\/MINICONTROL_USER=.*\/MINICONTROL_USER=$MINICONTROL_USER\/\" .env\r\nsed -i \"s\/MINICONTROL_PASSWORD=.*\/MINICONTROL_PASSWORD=$MINICONTROL_PASSWORD\/\" .env\r\n\r\n# Step 3: Database Configuration (if required)\r\necho \">>> Configuring database for MiniControl...\"\r\njq \\\r\n  --arg host \"$DB_HOST\" \\\r\n  --arg db \"$DB_NAME\" \\\r\n  --arg user \"$DB_USER\" \\\r\n  --arg password \"$DB_PASSWORD\" \\\r\n  --arg prefix \"$DB_PREFIX\" \\\r\n  '.host = $host | .db = $db | .user = $user | .password = $password | .prefix = $prefix' \\\r\n  \"\/mnt\/server\/config\/database.config.json\" >\"\/mnt\/server\/config\/database.config.json\"\r\n\r\n# Final Step: Download start.sh and finalize setup\r\ntouch cache\/.setupfinished\r\n\r\necho \">>> Downloading start.sh...\"\r\ncd \/mnt\/server && curl -sSL -o start.sh -f https:\/\/raw.githubusercontent.com\/FactoryBlack\/pelican-eggs-games-standalone\/refs\/heads\/main\/trackmania\/2020\/start-minicontrol.sh\r\n\r\nif [ $? -ne 0 ]; then\r\n  echo \">>> ERROR: File download failed.\"\r\n  exit 1\r\nfi\r\n\r\nchmod +x start.sh\r\necho \">>> Installation completed successfully.\"\r\nexit 0",
+            "container": "alpine:3.18.4",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "sort": 1,
+            "name": "SERVER_NAME",
+            "description": "The name of your Trackmania server.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "MyTrackmaniaServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 2,
+            "name": "MASTER_LOGIN",
+            "description": "Master server login.",
+            "env_variable": "MASTER_LOGIN",
+            "default_value": "yourMasterLogin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 3,
+            "name": "MASTER_PASSWORD",
+            "description": "Master server password.",
+            "env_variable": "MASTER_PASSWORD",
+            "default_value": "yourMasterPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 4,
+            "name": "MAX_PLAYER",
+            "description": "Maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYER",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "integer",
+                "between:1,100"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 5,
+            "name": "DB_HOST",
+            "description": "Database host for Trackmania server.",
+            "env_variable": "DB_HOST",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 6,
+            "name": "DB_NAME",
+            "description": "Database name for Trackmania server.",
+            "env_variable": "DB_NAME",
+            "default_value": "trackmania_db",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 7,
+            "name": "DB_USER",
+            "description": "Database username for Trackmania server.",
+            "env_variable": "DB_USER",
+            "default_value": "db_user",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 8,
+            "name": "DB_PASSWORD",
+            "description": "Database password for Trackmania server.",
+            "env_variable": "DB_PASSWORD",
+            "default_value": "db_password",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 9,
+            "name": "DB_PREFIX",
+            "description": "Database table prefix.",
+            "env_variable": "DB_PREFIX",
+            "default_value": "tm_",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "nullable",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 10,
+            "name": "RPC_LOGIN",
+            "description": "Login for RPC (Remote Procedure Call) communication.",
+            "env_variable": "RPC_LOGIN",
+            "default_value": "rpc_login",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 11,
+            "name": "RPC_PASSWORD",
+            "description": "Password for RPC communication.",
+            "env_variable": "RPC_PASSWORD",
+            "default_value": "rpc_password",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 12,
+            "name": "RPC_PORT",
+            "description": "Port used for RPC communication.",
+            "env_variable": "RPC_PORT",
+            "default_value": "5000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "integer",
+                "between:1024,65535"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 13,
+            "name": "RPC_IP",
+            "description": "P address used for RPC communication.",
+            "env_variable": "RPC_IP",
+            "default_value": "0.0.0.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 14,
+            "name": "FORCE_IP_ADDRESS",
+            "description": "Force the server to use this IP address.",
+            "env_variable": "FORCE_IP_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "nullable",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 15,
+            "name": "DEFAULT_MATCHSETTINGS",
+            "description": "Default match settings file for Trackmania.",
+            "env_variable": "DEFAULT_MATCHSETTINGS",
+            "default_value": "MatchSettings\/matchsettings.txt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "field_type": "text"
+        },
+        {
+            "sort": 16,
+            "name": "CONTACT_INFO",
+            "description": "Email address for use of Nadeo API incase they need to contact you for overuse etc. This is necessary for use of Nadeo's API.",
+            "env_variable": "CONTACT_INFO",
+            "default_value": "me@mail.com",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "nullable",
+                "email"
+            ],
+            "field_type": "text"
+        }
+    ]
+}
