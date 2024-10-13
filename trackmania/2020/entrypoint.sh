@@ -2,7 +2,7 @@
 echo ">>> Environment setup starting..."
 
 # Fix permissions if necessary
-chown -R container:container /mnt/server
+chown -R 0:0 /mnt/server
 
 # Ensure we're in the correct directory
 cd /mnt/server
