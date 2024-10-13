@@ -20,5 +20,7 @@ COPY ./entrypoint.sh /entrypoint.sh
 # Set executable permissions for the entrypoint script
 RUN chmod +x /entrypoint.sh
 
+RUN ls -la /
+
 # Set the entrypoint to handle initialization when the container starts
 ENTRYPOINT ["/entrypoint.sh"]
