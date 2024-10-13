@@ -12,15 +12,23 @@ RUN apk update && apk upgrade && \
     nodejs \
     npm \
     python3 \
-    py3-pip
+    py3-pip \
+    dos2unix
 
-# Copy the entrypoint script into the container
-COPY ./entrypoint.sh /entrypoint.sh
+# Create necessary directories
+RUN mkdir -p /mnt/server
+
+# Set the working directory to /mnt/server
+WORKDIR /mnt/server
+
+# Copy the entrypoint script into /mnt/server
+COPY entrypoint.sh /mnt/server/entrypoint.sh
+
+# Ensure proper line endings for Linux
+RUN dos2unix /mnt/server/entrypoint.sh
 
 # Set executable permissions for the entrypoint script
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /mnt/server/entrypoint.sh
 
-RUN ls -la /
-
-# Set the entrypoint to handle initialization when the container starts
-ENTRYPOINT ["/entrypoint.sh"]
+# Set the entrypoint to the correct path
+ENTRYPOINT ["/mnt/server/entrypoint.sh"]
