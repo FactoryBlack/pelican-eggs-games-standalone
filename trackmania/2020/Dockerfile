@@ -29,4 +29,4 @@ RUN chmod +x /entrypoint.sh
 RUN ls -la /
 
 # Set the entrypoint to handle initialization when the container starts
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/mnt/server/entrypoint.sh"]
