@@ -1,9 +1,9 @@
-FROM debian:stable-slim
+FROM alpine:3.18.4
 
-ENV DEBIAN_FRONTEND=noninteractive
+USER root
 
-# Install necessary packages with cleanup to reduce image size
-RUN apt update && apt install -y \
+# Install necessary packages
+RUN apk update && apk add --no-cache \
     git \
     xmlstarlet \
     jq \
@@ -11,22 +11,21 @@ RUN apt update && apt install -y \
     unzip \
     nodejs \
     npm \
-    dos2unix \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    dos2unix
 
 # Copy the entrypoint and start-minicontrol.sh scripts
 COPY ./entrypoint.sh /home/container/entrypoint.sh
 COPY ./start-minicontrol.sh /home/container/start-minicontrol.sh
 
+# Convert line endings and set executable permissions
+RUN dos2unix /home/container/entrypoint.sh /home/container/start-minicontrol.sh \
+    && chmod +x /home/container/entrypoint.sh /home/container/start-minicontrol.sh
+
 # Create the container user
-RUN useradd -m -d /home/container container
+RUN adduser -D -h /home/container container
 
 # Set correct ownership to container user
 RUN chown container:container /home/container/entrypoint.sh /home/container/start-minicontrol.sh
-
-# Convert line endings and set executable permissions as root
-RUN dos2unix /home/container/entrypoint.sh /home/container/start-minicontrol.sh \
-    && chmod +x /home/container/entrypoint.sh /home/container/start-minicontrol.sh
 
 USER container
 ENV USER=container HOME=/home/container
