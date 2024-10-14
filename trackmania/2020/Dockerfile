@@ -1,7 +1,5 @@
 FROM alpine:3.18.4
 
-USER root
-
 # Install necessary packages
 RUN apk update && apk add --no-cache \
     git \
