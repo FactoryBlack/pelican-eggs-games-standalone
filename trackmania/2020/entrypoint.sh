@@ -12,6 +12,6 @@ echo "Current directory: $(pwd)"
 ls -la /mnt/server
 
 # Start the server (if the egg doesn't handle it)
-/mnt/server/start-minicontrol.sh
+./start-minicontrol.sh
 
 echo ">>> Environment setup complete. Server starting..."
