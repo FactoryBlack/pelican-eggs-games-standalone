@@ -34,6 +34,9 @@ cd /home/container
 # Wait for a few seconds to allow the Trackmania server to initialize
 sleep 10
 
+# Start MiniControl with environment variables
+env $(cat /home/container/minicontrol/.env | xargs) tsx core/minicontrol.ts &
+
 # Start MiniControl
 echo ">>> Starting MiniControl..."
 cd /home/container/minicontrol
