@@ -1,31 +1,26 @@
-#!/bin/bash
-
-# Navigate to the server directory and start the Trackmania server
+#!/bin/ash
 echo ">>> Starting Trackmania server..."
 cd /mnt/server
-./server/TrackmaniaServer /title=Trackmania /game_Settings=Matchsettings/tracklist.txt /dedicated_cfg=dedicated_cfg.txt /nodaemon &
+./TrackmaniaServer /title=Trackmania /game_settings=MatchSettings/tracklist.txt /dedicated_cfg=dedicated_cfg.txt /nodaemon &
 
-# Debugging: Check if Trackmania server started correctly
-if [ $? -ne 0 ]; then
-    echo "TrackmaniaServer failed to start."
-    exit 1
-fi
-
-# Start MiniControl
 echo ">>> Starting MiniControl..."
-cd /mnt/server/minicontrol
+cd /home/container/minicontrol
+tsx --env-file=.env core/minicontrol.ts &
 
-# Load environment variables from .env and start MiniControl
-env $(cat /mnt/server/minicontrol/.env | xargs) tsx core/minicontrol.ts &
+minicontrol_pid=$!
 
-# Command loop to allow for graceful server stop
+echo ">>> Both Trackmania and MiniControl are running. Type '!stop' to stop the servers."
+
 while [[ $INPUT != "!stop" ]]; do
     eval $INPUT
     read INPUT
 done
 
-# Stopping Trackmania server
-pid=$(pgrep -f ./server/TrackmaniaServer)
-kill $pid
+echo ">>> Stopping Trackmania server..."
+trackmania_pid=$(pgrep -f ./TrackmaniaServer)
+kill $trackmania_pid
 
-echo ">>> Server stopped successfully."
+echo ">>> Stopping MiniControl..."
+kill $minicontrol_pid
+
+echo ">>> Both servers stopped."
