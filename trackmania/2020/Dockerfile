@@ -13,7 +13,8 @@ RUN apk update && apk upgrade && \
     npm \
     python3 \
     py3-pip \
-    dos2unix
+    dos2unix \
+    sudo
 
 # Create necessary directories
 RUN mkdir -p /mnt/server
