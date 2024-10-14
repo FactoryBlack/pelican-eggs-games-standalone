@@ -2,13 +2,11 @@
 echo ">>> Environment setup starting..."
 
 # Ensure we're in the correct directory
-cd /home/container
+cd /
 
-# Debugging: Check current directory and list files
-echo "Current directory: $(pwd)"
-ls -la /home/container
+# Check or setup any necessary configuration files here
 
-# Start the server
-./start-minicontrol.sh
+# Start the server (if the egg doesn't handle it)
+/home/container/start-minicontrol.sh
 
 echo ">>> Environment setup complete. Server starting..."
