@@ -2,7 +2,7 @@ FROM debian:stable-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install necessary packages
+# Install necessary packages with cleanup to reduce image size
 RUN apt update && apt install -y \
     git \
     xmlstarlet \
@@ -11,7 +11,8 @@ RUN apt update && apt install -y \
     unzip \
     nodejs \
     npm \
-    dos2unix
+    dos2unix \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy the entrypoint and start-minicontrol.sh scripts
 COPY ./entrypoint.sh /home/container/entrypoint.sh
