@@ -1,12 +1,16 @@
+# entrypoint.sh for setting up the environment and starting services
 #!/bin/ash
+
+# Debugging information
 echo ">>> Environment setup starting..."
+echo "Current directory: $(pwd)"
+ls -la
+
+# Fix permissions if necessary
+chown -R container:container /home/container
 
 # Ensure we're in the correct directory
-cd /
+cd /home/container
 
-# Check or setup any necessary configuration files here
-
-# Start the server (if the egg doesn't handle it)
-/home/container/start-minicontrol.sh
-
-echo ">>> Environment setup complete. Server starting..."
+# Start the server (if not handled by the egg)
+./start-minicontrol.sh
