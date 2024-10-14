@@ -3,7 +3,7 @@ FROM debian:stable-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
-RUN apk update && apk add --no-cache \
+RUN apt update && apt install -y \
     git \
     xmlstarlet \
     jq \
@@ -13,7 +13,6 @@ RUN apk update && apk add --no-cache \
     npm \
     dos2unix
 
-# Set container user and environment
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
