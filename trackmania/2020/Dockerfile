@@ -13,6 +13,9 @@ RUN apk update && apk add --no-cache \
     npm \
     dos2unix
 
+# Create container user
+RUN adduser -D -h /home/container container
+
 # Set container user and environment
 USER container
 ENV USER=container HOME=/home/container
