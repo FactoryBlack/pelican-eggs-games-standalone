@@ -16,18 +16,16 @@ RUN apk update && apk add --no-cache \
 # Create container user
 RUN adduser -D -h /home/container container
 
+# Set permissions for scripts before switching user
+COPY ./entrypoint.sh /entrypoint.sh
+COPY ./start-minicontrol.sh /home/container/start-minicontrol.sh
+RUN dos2unix /entrypoint.sh /home/container/start-minicontrol.sh \
+    && chmod +x /entrypoint.sh /home/container/start-minicontrol.sh
+
 # Set container user and environment
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /
-
-# Copy the entrypoint and start-minicontrol.sh scripts
-COPY ./entrypoint.sh /entrypoint.sh
-COPY ./start-minicontrol.sh /home/container/start-minicontrol.sh
-
-# Convert line endings for scripts and set permissions
-RUN dos2unix /entrypoint.sh /home/container/start-minicontrol.sh \
-    && chmod +x /entrypoint.sh /home/container/start-minicontrol.sh
 
 # Install tsx for MiniControl
 RUN npm install -g tsx
