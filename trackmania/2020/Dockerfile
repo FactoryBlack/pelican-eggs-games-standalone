@@ -13,6 +13,9 @@ RUN apt update && apt install -y \
     npm \
     dos2unix
 
+# Create the container user
+RUN useradd -m -d /home/container container
+
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
