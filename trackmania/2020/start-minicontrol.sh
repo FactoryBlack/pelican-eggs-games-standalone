@@ -28,7 +28,7 @@ stop_server() {
 
 # Start Trackmania server
 echo ">>> Starting Trackmania server..."
-cd /mnt/server
+cd /home/container
 ./server/TrackmaniaServer /title=Trackmania /game_settings=Matchsettings/tracklist.txt /dedicated_cfg=dedicated_cfg.txt /nodaemon &
 
 # Wait for a few seconds to allow the Trackmania server to initialize
@@ -36,7 +36,8 @@ sleep 10
 
 # Start MiniControl
 echo ">>> Starting MiniControl..."
-minicontrol --config=config.yml &
+cd /home/container/minicontrol
+npm start &
 
 # Keep the process running and listen for commands
 echo ">>> Both Trackmania and MiniControl are running. Type '!stop' to stop the servers."
