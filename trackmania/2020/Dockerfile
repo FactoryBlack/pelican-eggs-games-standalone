@@ -22,13 +22,14 @@ COPY ./start-minicontrol.sh /home/container/start-minicontrol.sh
 RUN dos2unix /entrypoint.sh /home/container/start-minicontrol.sh \
     && chmod +x /entrypoint.sh /home/container/start-minicontrol.sh
 
-# Set container user and environment
+# Install tsx for MiniControl (run as root)
+USER root
+RUN npm install -g tsx
+
+# Switch back to container user
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /
-
-# Install tsx for MiniControl
-RUN npm install -g tsx
 
 # Set the entrypoint script
 ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
