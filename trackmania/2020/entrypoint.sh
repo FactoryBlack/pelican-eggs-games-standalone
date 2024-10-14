@@ -2,12 +2,14 @@
 echo ">>> Environment setup starting..."
 
 # Fix permissions if necessary
-chown -R 0:0 /mnt/server
+chown -R container:container /mnt/server
 
 # Ensure we're in the correct directory
 cd /mnt/server
 
-# Check or setup any necessary configuration files here
+# Debugging: Check current directory and list files
+echo "Current directory: $(pwd)"
+ls -la /mnt/server
 
 # Start the server (if the egg doesn't handle it)
 ./start-minicontrol.sh
