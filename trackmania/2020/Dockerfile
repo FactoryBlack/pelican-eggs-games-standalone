@@ -1,3 +1,4 @@
+# Dockerfile for setting up Trackmania and MiniControl in a Pelican container
 FROM alpine:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -18,9 +19,7 @@ RUN adduser -D -h /home/container container
 
 # Set permissions for scripts before switching user
 COPY ./entrypoint.sh /entrypoint.sh
-COPY ./start-minicontrol.sh /home/container/start-minicontrol.sh
-RUN dos2unix /entrypoint.sh /home/container/start-minicontrol.sh \
-    && chmod +x /entrypoint.sh /home/container/start-minicontrol.sh
+RUN dos2unix /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Install tsx for MiniControl (run as root)
 USER root
