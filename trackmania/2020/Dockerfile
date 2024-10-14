@@ -1,4 +1,6 @@
-FROM alpine:3.18.4
+FROM debian:stable-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
 RUN apk update && apk add --no-cache \
@@ -12,7 +14,6 @@ RUN apk update && apk add --no-cache \
     dos2unix
 
 # Set container user and environment
-RUN adduser -D -h /home/container container
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
